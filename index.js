@@ -63,6 +63,6 @@ app.get('/:address', (req, res) => {
   });
 });
 
-app.listen(port, host, () => {
+app.listen(port, 'localhost', () => {
   console.log(`Server listening at ${baseUrl}`);
 });
