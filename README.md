@@ -21,7 +21,7 @@ This Node.js web application 🚀 reads a list of cryptocurrency wallet addresse
 ## Installation
 
 ```bash
-git clone https://github.com/rootedbox/wallet_check.git
+git clone git@github.com:VolumeFi/wallet_check.git
 cd wallet_check
 npm install
 # Configure your .env file
