@@ -29,9 +29,10 @@ const checkBalance = (address, callback) => {
         console.log(`Balance for ${address}: ${amount}`);
         return callback(null, amount >= 5);
       }
-      return callback(null, false);
       console.log(`No balance found for ${address}`);
+      return callback(null, false);
     } catch (parseError) {
+      console.error(`JSON parse error: ${parseError}`);
       return callback(parseError, null);
     }
   });
@@ -41,17 +42,18 @@ const checkBalance = (address, callback) => {
 let addresses = [];
 try {
   const data = fs.readFileSync('addresses.txt', 'utf8');
-  addresses = data.split('\n').filter(line => line.length > 0);
+  addresses = data.split('\n').filter(line => line.startsWith('paloma') && line.length > 0);
   console.log(`Loaded ${addresses.length} addresses`);
 } catch (err) {
-  console.error(err);
+  console.error(`Error reading addresses file: ${err}`);
 }
 
 app.get('/', (req, res) => {
+  console.log('Received request for root URL');
   let html = '<h1>Addresses</h1>';
   html += '<ul>';
   addresses.forEach(address => {
-    html += `<li><a href="${baseUrl}/${address}">${address}</a></li>`;
+    html += `<li><a href="${baseUrl}/${encodeURIComponent(address)}">${address}</a></li>`;
   });
   html += '</ul>';
   res.setHeader('Content-Type', 'text/html');
@@ -59,11 +61,16 @@ app.get('/', (req, res) => {
 });
 
 app.get('/:address', (req, res) => {
-  console.log('Received request for root URL');
   const address = req.params.address;
+  if (!address.startsWith('paloma')) {
+    console.log(`Invalid address received: ${address}`);
+    res.status(400).send('Invalid address');
+    return;
+  }
   console.log(`Received request for address: ${address}`);
   checkBalance(address, (err, isBalanceSufficient) => {
     if (err) {
+      console.error(`Error checking balance for ${address}: ${err}`);
       res.status(500).send('Error checking balance');
     } else {
       console.log(`Balance check result for ${address}: ${isBalanceSufficient}`);
